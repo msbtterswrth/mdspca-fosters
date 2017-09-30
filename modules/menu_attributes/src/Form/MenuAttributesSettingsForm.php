@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\menu_attributes\Form\MenuAttributesSettingsForm.
- */
-
 namespace Drupal\menu_attributes\Form;
 
 use Drupal\Component\Utility\Unicode;

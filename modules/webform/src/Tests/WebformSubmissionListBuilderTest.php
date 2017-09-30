@@ -2,6 +2,8 @@
 
 namespace Drupal\webform\Tests;
 
+use Drupal\webform\Entity\Webform;
+
 /**
  * Tests for webform submission list builder.
  *
@@ -14,14 +16,14 @@ class WebformSubmissionListBuilderTest extends WebformTestBase {
    *
    * @var array
    */
-  protected static $modules = ['node', 'webform'];
+  public static $modules = ['node', 'webform', 'webform_test_submissions'];
 
   /**
    * Webforms to load.
    *
    * @var array
    */
-  protected static $testWebforms = ['test_results'];
+  protected static $testWebforms = ['test_submissions'];
 
   /**
    * {@inheritdoc}
@@ -39,12 +41,13 @@ class WebformSubmissionListBuilderTest extends WebformTestBase {
   public function testResults() {
     global $base_path;
 
-    // Login the normal user.
-    $this->drupalLogin($this->normalUser);
-
     /** @var \Drupal\webform\WebformInterface $webform */
+    $webform = Webform::load('test_submissions');
     /** @var \Drupal\webform\WebformSubmissionInterface[] $submissions */
-    list($webform, $submissions) = $this->createWebformWithSubmissions();
+    $submissions = array_values(\Drupal::entityTypeManager()->getStorage('webform_submission')->loadByProperties(['webform_id' => 'test_submissions']));
+
+    // Login the normal user.
+    $this->drupalLogin($this->ownWebformSubmissionUser);
 
     // Make the second submission to be starred (aka sticky).
     $submissions[1]->setSticky(TRUE)->save();
@@ -53,7 +56,7 @@ class WebformSubmissionListBuilderTest extends WebformTestBase {
 
     /* Filter */
 
-    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/table');
+    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/submissions');
 
     // Check state options with totals.
     $this->assertRaw('<select data-drupal-selector="edit-state" id="edit-state" name="state" class="form-select"><option value="" selected="selected">All [3]</option><option value="starred">Starred [1]</option><option value="unstarred">Unstarred [2]</option></select>');
@@ -62,32 +65,34 @@ class WebformSubmissionListBuilderTest extends WebformTestBase {
     $this->assertLinkByHref($submissions[0]->toUrl()->toString());
     $this->assertLinkByHref($submissions[1]->toUrl()->toString());
     $this->assertLinkByHref($submissions[2]->toUrl()->toString());
-    $this->assertRaw($submissions[0]->getData('first_name'));
-    $this->assertRaw($submissions[1]->getData('first_name'));
-    $this->assertRaw($submissions[2]->getData('first_name'));
+    $this->assertRaw($submissions[0]->getElementData('first_name'));
+    $this->assertRaw($submissions[1]->getElementData('first_name'));
+    $this->assertRaw($submissions[2]->getElementData('first_name'));
     $this->assertNoFieldById('edit-reset', 'reset');
 
     // Check results filtered by key(word).
-    $this->drupalPostForm('admin/structure/webform/manage/' . $webform->id() . '/results/table', ['search' => $submissions[0]->getData('first_name')], t('Filter'));
-    $this->assertUrl('admin/structure/webform/manage/' . $webform->id() . '/results/table?search=' . $submissions[0]->getData('first_name') . '&state=');
-    $this->assertRaw($submissions[0]->getData('first_name'));
-    $this->assertNoRaw($submissions[1]->getData('first_name'));
-    $this->assertNoRaw($submissions[2]->getData('first_name'));
+    $this->drupalPostForm('admin/structure/webform/manage/' . $webform->id() . '/results/submissions', ['search' => $submissions[0]->getElementData('first_name')], t('Filter'));
+    $this->assertUrl('admin/structure/webform/manage/' . $webform->id() . '/results/submissions?search=' . $submissions[0]->getElementData('first_name') . '&state=');
+    $this->assertRaw($submissions[0]->getElementData('first_name'));
+    $this->assertNoRaw($submissions[1]->getElementData('first_name'));
+    $this->assertNoRaw($submissions[2]->getElementData('first_name'));
     $this->assertFieldById('edit-reset', 'Reset');
 
     // Check results filtered by state.
-    $this->drupalPostForm('admin/structure/webform/manage/' . $webform->id() . '/results/table', ['state' => 'starred'], t('Filter'));
-    $this->assertUrl('admin/structure/webform/manage/' . $webform->id() . '/results/table?search=&state=starred');
+    $this->drupalPostForm('admin/structure/webform/manage/' . $webform->id() . '/results/submissions', ['state' => 'starred'], t('Filter'));
+    $this->assertUrl('admin/structure/webform/manage/' . $webform->id() . '/results/submissions?search=&state=starred');
     $this->assertRaw('<option value="starred" selected="selected">Starred [1]</option>');
-    $this->assertNoRaw($submissions[0]->getData('first_name'));
-    $this->assertRaw($submissions[1]->getData('first_name'));
-    $this->assertNoRaw($submissions[2]->getData('first_name'));
+    $this->assertNoRaw($submissions[0]->getElementData('first_name'));
+    $this->assertRaw($submissions[1]->getElementData('first_name'));
+    $this->assertNoRaw($submissions[2]->getElementData('first_name'));
     $this->assertFieldById('edit-reset', 'Reset');
 
-    /* Customize */
+    /**************************************************************************/
+    // Customize submission results.
+    /**************************************************************************/
 
     // Check that created is visible and changed is hidden.
-    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/table');
+    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/submissions');
     $this->assertRaw('sort by Created');
     $this->assertNoRaw('sort by Changed');
 
@@ -113,11 +118,11 @@ class WebformSubmissionListBuilderTest extends WebformTestBase {
       'direction' => 'desc',
       'limit' => 20,
     ];
-    $this->drupalPostForm('admin/structure/webform/manage/' . $webform->id() . '/results/table/custom', $edit, t('Save'));
+    $this->drupalPostForm('admin/structure/webform/manage/' . $webform->id() . '/results/submissions/custom', $edit, t('Save'));
     $this->assertRaw('The customized table has been saved.');
 
     // Check that sid is hidden and changed is visible.
-    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/table');
+    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/submissions');
     $this->assertNoRaw('sort by Created');
     $this->assertRaw('sort by Changed');
 
@@ -131,24 +136,24 @@ class WebformSubmissionListBuilderTest extends WebformTestBase {
     $webform->setState('results.custom.limit', 1);
 
     // Check that only one result (Hillary #2) is displayed with pager.
-    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/table');
-    $this->assertNoRaw($submissions[0]->getData('first_name'));
-    $this->assertNoRaw($submissions[1]->getData('first_name'));
-    $this->assertRaw($submissions[2]->getData('first_name'));
+    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/submissions');
+    $this->assertNoRaw($submissions[0]->getElementData('first_name'));
+    $this->assertNoRaw($submissions[1]->getElementData('first_name'));
+    $this->assertRaw($submissions[2]->getElementData('first_name'));
     $this->assertRaw('<nav class="pager" role="navigation" aria-labelledby="pagination-heading">');
 
     // Reset the limit to 20.
     $webform->setState('results.custom.limit', 20);
 
     // Check Header label and element value display.
-    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/table');
+    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/submissions');
 
     // Check user header and value.
-    $this->assertRaw('<a href="' . $base_path . 'admin/structure/webform/manage/' . $webform->id() . '/results/table?sort=asc&amp;order=User" title="sort by User">User</a>');
-    $this->assertRaw('<td class="priority-medium">' . $this->normalUser->getAccountName() . '</td>');
+    $this->assertRaw('<a href="' . $base_path . 'admin/structure/webform/manage/' . $webform->id() . '/results/submissions?sort=asc&amp;order=User" title="sort by User">User</a>');
+    $this->assertRaw('<td class="priority-medium">Anonymous</td>');
 
     // Check date of birth.
-    $this->assertRaw('<th specifier="element__dob"><a href="' . $base_path . 'admin/structure/webform/manage/' . $webform->id() . '/results/table?sort=asc&amp;order=Date%20of%20birth" title="sort by Date of birth">Date of birth</a></th>');
+    $this->assertRaw('<th specifier="element__dob"><a href="' . $base_path . 'admin/structure/webform/manage/' . $webform->id() . '/results/submissions?sort=asc&amp;order=Date%20of%20birth" title="sort by Date of birth">Date of birth</a></th>');
     $this->assertRaw('<td>Sunday, October 26, 1947</td>');
 
     // Display Header key and element raw.
@@ -157,15 +162,39 @@ class WebformSubmissionListBuilderTest extends WebformTestBase {
       'element_format' => 'raw',
     ]);
 
-    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/table');
+    $this->drupalGet('admin/structure/webform/manage/' . $webform->id() . '/results/submissions');
 
     // Check user header and value.
-    $this->assertRaw('<a href="' . $base_path . 'admin/structure/webform/manage/' . $webform->id() . '/results/table?sort=asc&amp;order=uid" title="sort by uid">uid</a>');
-    $this->assertRaw('<td class="priority-medium">' . $this->normalUser->id() . '</td>');
+    $this->assertRaw('<a href="' . $base_path . 'admin/structure/webform/manage/' . $webform->id() . '/results/submissions?sort=asc&amp;order=uid" title="sort by uid">uid</a>');
+    $this->assertRaw('<td class="priority-medium">0</td>');
 
     // Check date of birth.
-    $this->assertRaw('<th specifier="element__dob"><a href="' . $base_path . 'admin/structure/webform/manage/' . $webform->id() . '/results/table?sort=asc&amp;order=dob" title="sort by dob">dob</a></th>');
-    $this->assertRaw('<td>Sun, 26 Oct 1947 00:00:00 +1000am0</td>');
+    $this->assertRaw('<th specifier="element__dob"><a href="' . $base_path . 'admin/structure/webform/manage/' . $webform->id() . '/results/submissions?sort=asc&amp;order=dob" title="sort by dob">dob</a></th>');
+    $this->assertRaw('<td>1947-10-26</td>');
+
+    /**************************************************************************/
+    // Customize user results.
+    /**************************************************************************/
+
+    $this->drupalLogin($this->ownWebformSubmissionUser);
+
+    // Check view own submissions.
+    $this->drupalget('/webform/' . $webform->id() . '/submissions');
+    $this->assertRaw('<th specifier="serial" aria-sort="descending" class="is-active">');
+    $this->assertRaw('<th specifier="created" class="priority-medium">');
+    $this->assertRaw('<th specifier="remote_addr" class="priority-low">');
+
+    // Display on first name and last name columns.
+    $webform->setSetting('submission_user_columns', ['element__first_name', 'element__last_name'])
+      ->save();
+
+    // Check view own submissions only include first name and last name,
+    $this->drupalget('/webform/' . $webform->id() . '/submissions');
+    $this->assertNoRaw('<th specifier="serial" aria-sort="descending" class="is-active">');
+    $this->assertNoRaw('<th specifier="created" class="priority-medium">');
+    $this->assertNoRaw('<th specifier="remote_addr" class="priority-low">');
+    $this->assertRaw('<th specifier="element__first_name" aria-sort="ascending" class="is-active">');
+    $this->assertRaw('<th specifier="element__last_name">');
   }
 
 }

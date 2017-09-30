@@ -14,6 +14,29 @@
 }
 
 /**
+ * Help page.
+ */
+.webform-help h4 {
+  font-size: 1em;
+  text-transform: uppercase;
+}
+
+.webform-help .button.button--primary {
+  width: 100%;
+  max-width: 600px;
+  margin: 0;
+}
+
+.webform-help img {
+  width: 100%;
+  height: auto;
+}
+
+.webform-help .webform-help-video-youtube {
+  max-width: 600px;
+}
+
+/**
  * Help play button.
  */
 .button.button-webform-play:before {

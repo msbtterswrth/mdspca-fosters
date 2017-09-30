@@ -24,7 +24,7 @@ abstract class WebformExcludedBase extends FormElement {
       '#process' => [
         [$class, 'processWebformExcluded'],
       ],
-      '#webform' => NULL,
+      '#webform_id' => NULL,
       '#theme_wrappers' => ['form_element'],
     ];
   }
@@ -47,6 +47,9 @@ abstract class WebformExcludedBase extends FormElement {
       '#empty' => t('No elements are available.'),
       '#default_value' => array_combine($default_value, $default_value),
     ];
+    if (isset($element['#parents'])) {
+      $element['tableselect']['#parents'] = array_merge($element['#parents'], ['tableselect']);
+    }
 
     // Build tableselect element with selected properties.
     $properties = [
@@ -77,6 +80,16 @@ abstract class WebformExcludedBase extends FormElement {
   }
 
   /**
+   * Get header for the excluded tableselect element.
+   *
+   * @return array
+   *   An array container the header for the excluded tableselect element.
+   */
+  public static function getWebformExcludedHeader() {
+    return [];
+  }
+
+  /**
    * Get options for excluded tableselect element.
    *
    * @param array $element
@@ -88,29 +101,7 @@ abstract class WebformExcludedBase extends FormElement {
    *   tableselect element.
    */
   public static function getWebformExcludedOptions(array $element) {
-    /** @var \Drupal\webform\WebformInterface $webform */
-    $webform = $element['#webform'];
-
-    $options = [];
-    $elements = $webform->getElementsInitializedFlattenedAndHasValue('view');
-    foreach ($elements as $key => $element) {
-      $options[$key] = [
-        ['title' => $element['#admin_title'] ?:$element['#title'] ?: $key],
-        ['name' => $key],
-        ['type' => isset($element['#type']) ? $element['#type'] : ''],
-      ];
-    }
-    return $options;
-  }
-
-  /**
-   * Get header for the excluded tableselect element.
-   *
-   * @return array
-   *   An array container the header for the excluded tableselect element.
-   */
-  public static function getWebformExcludedHeader() {
-    return [t('Title'), t('Name'), t('Type')];
+    return [];
   }
 
 }

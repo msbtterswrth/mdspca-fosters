@@ -6,11 +6,33 @@ use Drupal\Core\Config\Entity\ConfigEntityInterface;
 use Drupal\Core\Entity\EntityWithPluginCollectionInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\user\EntityOwnerInterface;
+use Drupal\webform\Plugin\WebformHandlerInterface;
 
 /**
  * Provides an interface defining a webform entity.
  */
 interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollectionInterface, EntityOwnerInterface {
+
+  /**
+   * Denote drafts are not allowed.
+   *
+   * @var string
+   */
+  const DRAFT_NONE = 'none';
+
+  /**
+   * Denote drafts are allowed for authenticated users only.
+   *
+   * @var string
+   */
+  const DRAFT_AUTHENTICATED = 'authenticated';
+
+  /**
+   * Denote drafts are allowed for authenticated and anonymous users.
+   *
+   * @var string
+   */
+  const DRAFT_ALL = 'all';
 
   /**
    * Webform status open.
@@ -26,6 +48,41 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    * Webform status scheduled.
    */
   const STATUS_SCHEDULED = 'scheduled';
+
+  /**
+   * Webform confirmation page.
+   */
+  const CONFIRMATION_PAGE = 'page';
+
+  /**
+   * Webform confirmation URL.
+   */
+  const CONFIRMATION_URL = 'url';
+
+  /**
+   * Webform confirmation URL with message.
+   */
+  const CONFIRMATION_URL_MESSAGE = 'url_message';
+
+  /**
+   * Webform confirmation inline.
+   */
+  const CONFIRMATION_INLINE = 'inline';
+
+  /**
+   * Webform confirmation message.
+   */
+  const CONFIRMATION_MESSAGE = 'message';
+
+  /**
+   * Webform confirmation modal.
+   */
+  const CONFIRMATION_MODAL = 'modal';
+
+  /**
+   * Webform confirmation default.
+   */
+  const CONFIRMATION_DEFAULT = 'default';
 
   /**
    * Returns the webform's (original) langcode.
@@ -55,9 +112,82 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    * Determine if the webform is using a Flexbox layout.
    *
    * @return bool
-   *   TRUE if if the webform is using a Flexbox layout.
+   *   TRUE if the webform is using a Flexbox layout.
    */
   public function hasFlexboxLayout();
+
+  /**
+   * Determine if the webform has any containers.
+   *
+   * @return bool
+   *   TRUE if the webform has any containers.
+   */
+  public function hasContainer();
+
+  /**
+   * Determine if the webform has conditional logic (ie #states).
+   *
+   * @return bool
+   *   TRUE if the webform has conditional logic
+   */
+  public function hasConditions();
+
+  /**
+   * Determine if the webform has any custom actions (aka submit buttons).
+   *
+   * @return bool
+   *   TRUE if the webform has any custom actions (aka submit buttons).
+   */
+  public function hasActions();
+
+  /**
+   * Get the number of actions (aka submit buttons).
+   *
+   * @return int
+   *   The number of actions (aka submit buttons).
+   */
+  public function getNumberOfActions();
+
+  /**
+   * Determine if the webform has multistep form wizard pages.
+   *
+   * @return bool
+   *   TRUE if the webform has multistep form wizard pages.
+   */
+  public function hasWizardPages();
+
+  /**
+   * Get the number of wizard pages.
+   *
+   * @return int
+   *   The number of wizard pages.
+   */
+  public function getNumberOfWizardPages();
+
+  /**
+   * Sets the webform settings and properties override state.
+   *
+   * Setting the override state to TRUE allows modules to alter a webform's
+   * settings and properties while blocking a webform from being saved with
+   * the overridden settings.
+   *
+   * @param bool $override
+   *   The override state of the Webform.
+   *
+   * @return $this
+   *
+   * @see \Drupal\webform\WebformInterface::setSettingsOverride
+   * @see \Drupal\webform\Entity\Webform::preSave
+   */
+  public function setOverride($override = TRUE);
+
+  /**
+   * Returns the webform override status.
+   *
+   * @return bool
+   *   TRUE if the webform has any overridden settings or properties.
+   */
+  public function isOverridden();
 
   /**
    * Sets the status of the configuration entity.
@@ -97,6 +227,14 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
   public function isScheduled();
 
   /**
+   * Determines if the webform is currently closed but scheduled to open.
+   *
+   * @return bool
+   *   TRUE if the webform is currently closed but scheduled to open.
+   */
+  public function isOpening();
+
+  /**
    * Returns the webform template indicator.
    *
    * @return bool
@@ -119,6 +257,14 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    *   TRUE if the webform has submissions.
    */
   public function hasSubmissions();
+
+  /**
+   * Determine if submissions are being logged.
+   *
+   * @return bool
+   *   TRUE if submissions are being logged.
+   */
+  public function hasSubmissionLog();
 
   /**
    * Determine if the current webform is translated.
@@ -213,14 +359,17 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    *
    * @param string $key
    *   The key of the setting to retrieve.
+   * @param bool $default
+   *   Flag to lookup the default settings from 'webform.settings' config.
+   *   Only used when rendering webform.
    *
    * @return mixed
    *   The settings value, or NULL if no settings exists.
    */
-  public function getSetting($key);
+  public function getSetting($key, $default = FALSE);
 
   /**
-   * Saves a webform setting for a given key.
+   * Sets a webform setting for a given key.
    *
    * @param string $key
    *   The key of the setting to store.
@@ -230,6 +379,49 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    * @return $this
    */
   public function setSetting($key, $value);
+
+  /**
+   * Sets the webform settings override.
+   *
+   * Using this methods stops a webform from being saved with the overridden
+   * settings.
+   *
+   * @param array $settings
+   *   The structured array containing the webform setting override.
+   *
+   * @return $this
+   */
+  public function setSettingsOverride(array $settings);
+
+  /**
+   * Sets a webform setting override for a given key.
+   *
+   * Using this methods stops a webform from being saved with the overridden
+   * setting.
+   *
+   * @param string $key
+   *   The key of the setting override to store.
+   * @param mixed $value
+   *   The data to store.
+   *
+   * @return $this
+   */
+  public function setSettingOverride($key, $value);
+
+  /**
+   * Sets the value of an overridden property.
+   *
+   * Using this methods stops a webform from being saved with the overridden
+   * property.
+   *
+   * @param string $property_name
+   *   The name of the property that should be set.
+   * @param mixed $value
+   *   The value the property should be set to.
+   *
+   * @return $this
+   */
+  public function setPropertyOverride($property_name, $value);
 
   /**
    * Returns the webform access controls.
@@ -287,21 +479,14 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    * @param array $values
    *   (optional) An array of values to set, keyed by property name.
    * @param string $operation
-   *   (optional) The operation identifying the webform variation to be returned.
-   *   Defaults to 'default'. This is typically used in routing.
+   *   (optional) The operation identifying the webform submission form
+   *   variation to be returned.
+   *   Defaults to 'add'. This is typically used in routing.
    *
    * @return array
    *   A render array representing a webform submission webform.
    */
-  public function getSubmissionForm(array $values = [], $operation = 'default');
-
-  /**
-   * Get elements (YAML) value.
-   *
-   * @return string
-   *   The elements raw value.
-   */
-  public function getElementsRaw();
+  public function getSubmissionForm(array $values = [], $operation = 'add');
 
   /**
    * Get original elements (YAML) value.
@@ -311,6 +496,22 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    *   webforms.
    */
   public function getElementsOriginalRaw();
+
+  /**
+   * Get original elements decoded as an associative array.
+   *
+   * @return array|bool
+   *   Elements as an associative array. Returns FALSE is elements YAML is invalid.
+   */
+  public function getElementsOriginalDecoded();
+
+  /**
+   * Get elements (YAML) value.
+   *
+   * @return string
+   *   The elements raw value.
+   */
+  public function getElementsRaw();
 
   /**
    * Get webform elements decoded as an associative array.
@@ -408,11 +609,12 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    *
    * @param string $key
    *   The element's key.
-   *
+   * @param bool $include_children
+   *   Include initialized children.
    * @return array|null
    *   An associative array containing an initialized element.
    */
-  public function getElement($key);
+  public function getElement($key, $include_children = FALSE);
 
   /**
    * Get a webform's raw (uninitialized) element.
@@ -425,28 +627,33 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    */
   public function getElementDecoded($key);
 
+
   /**
    * Get webform wizard pages.
    *
-   * @param bool $disable_pages
-   *   If set to TRUE all wizard page will be ignored only the (optional)
-   *   preview page will be return.
+   * @param string $operation
+   *   The webform submission operation. 
+   *   Usually 'default', 'add', 'edit', 'edit_all', 'api', or 'test'
    *
    * @return array
    *   An associative array of webform wizard pages.
+   * 
+   * @see \Drupal\webform\Entity\WebformSubmission
    */
-  public function getPages($disable_pages = FALSE);
+  public function getPages($operation = '');
 
   /**
    * Get webform wizard page.
    *
+   * @param string $operation
+   *   Operation being performed.
    * @param string|int $key
    *   The name/key of a webform wizard page.
    *
    * @return array|null
    *   A webform wizard page element.
    */
-  public function getPage($key);
+  public function getPage($operation, $key);
 
   /**
    * Update submit and confirm paths (ie URL aliases) associated with this webform.
@@ -464,7 +671,7 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    * @param string $handler_id
    *   The webform handler ID.
    *
-   * @return \Drupal\webform\WebformHandlerInterface
+   * @return \Drupal\webform\Plugin\WebformHandlerInterface
    *   The webform handler object.
    */
   public function getHandler($handler_id);
@@ -479,34 +686,47 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    *   (optional) Status used to return enabled or disabled plugin instances
    *   (ie handlers).
    * @param int $results
-   *   (optional) Value indicating if webform submissions are saved to internal or
-   *   external system.
+   *   (optional) Value indicating if webform submissions are saved to internal
+   *   or external system.
+   * @param int $submission
+   *   (optional) Value indicating if webform submissions must be saved to the
+   *   database.
    *
-   * @return \Drupal\webform\WebformHandlerPluginCollection|\Drupal\webform\WebformHandlerInterface[]
+   * @return \Drupal\webform\Plugin\WebformHandlerPluginCollection|\Drupal\webform\Plugin\WebformHandlerInterface[]
    *   The webform handler plugin collection.
    */
-  public function getHandlers($plugin_id = NULL, $status = NULL, $results = NULL);
+  public function getHandlers($plugin_id = NULL, $status = NULL, $results = NULL, $submission = NULL);
 
   /**
    * Saves a webform handler for this webform.
    *
-   * @param array $configuration
-   *   An array of webform handler configuration.
+   * @param \Drupal\webform\Plugin\WebformHandlerInterface $handler
+   *   The webform handler object.
    *
    * @return string
    *   The webform handler ID.
    */
-  public function addWebformHandler(array $configuration);
+  public function addWebformHandler(WebformHandlerInterface $handler);
 
   /**
-   * Deletes a webform handler from this style.
+   * Update a webform handler for this webform.
    *
-   * @param \Drupal\webform\WebformHandlerInterface $effect
+   * @param \Drupal\webform\Plugin\WebformHandlerInterface $handler
    *   The webform handler object.
    *
    * @return $this
    */
-  public function deleteWebformHandler(WebformHandlerInterface $effect);
+  public function updateWebformHandler(WebformHandlerInterface $handler);
+
+  /**
+   * Deletes a webform handler from this webform.
+   *
+   * @param \Drupal\webform\Plugin\WebformHandlerInterface $handler
+   *   The webform handler object.
+   *
+   * @return $this
+   */
+  public function deleteWebformHandler(WebformHandlerInterface $handler);
 
   /**
    * Invoke a handlers method.
@@ -582,7 +802,7 @@ interface WebformInterface extends ConfigEntityInterface, EntityWithPluginCollec
    *   The key of the data to retrieve.
    *
    * @return bool
-   *   TRUE if the  stored value for a given key exists
+   *   TRUE if the stored value for a given key exists
    */
   public function hasState($key);
 

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * @file
- * Contains \Drupal\menu_attributes\Tests\MenuAttributesNodeTest.
- */
-
 namespace Drupal\menu_attributes\Tests;
 use Drupal\Core\Language\Language;
 

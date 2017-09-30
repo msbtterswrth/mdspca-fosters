@@ -1,7 +1,7 @@
 # Schema for the configuration files of the Menu Attributes module.
 
 menu_attributes.settings:
-  type: mapping
+  type: config_object
   label: 'Menu attributes settings'
   mapping:
     attribute_enable:

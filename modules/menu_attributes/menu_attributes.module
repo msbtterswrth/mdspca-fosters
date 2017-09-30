@@ -252,10 +252,10 @@ function _menu_attributes_form_alter(array &$form, FormStateInterface $form_stat
  */
 function _menu_attributes_form_submit($form, FormStateInterface $form_state) {
   $menu_link = $form_state->getFormObject()->getEntity();
-  $options = array(
+  $options = [
     MENU_ATTRIBUTES_LINK => $form_state->getValue(MENU_ATTRIBUTES_LINK),
     MENU_ATTRIBUTES_ITEM => $form_state->getValue(MENU_ATTRIBUTES_ITEM),
-  );
+  ];
 
   $menu_link->link->first()->options = $options;
   $menu_link->save();

@@ -6,9 +6,9 @@ use Drupal\Component\Render\FormattableMarkup;
 use Drupal\Core\Form\ConfirmFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Render\RendererInterface;
-use Drupal\webform\WebformDialogTrait;
+use Drupal\webform\Form\WebformDialogFormTrait;
+use Drupal\webform\WebformEntityElementsValidatorInterface;
 use Drupal\webform\WebformInterface;
-use Drupal\webform\WebformEntityElementsValidator;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -17,7 +17,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 class WebformUiElementDeleteForm extends ConfirmFormBase {
 
-  use WebformDialogTrait;
+  use WebformDialogFormTrait;
 
   /**
    * The renderer.
@@ -43,7 +43,7 @@ class WebformUiElementDeleteForm extends ConfirmFormBase {
   /**
    * A webform element.
    *
-   * @var \Drupal\webform\WebformElementInterface
+   * @var \Drupal\webform\Plugin\WebformElementInterface
    */
   protected $webformElement;
 
@@ -66,10 +66,10 @@ class WebformUiElementDeleteForm extends ConfirmFormBase {
    *
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
-   * @param \Drupal\webform\WebformEntityElementsValidator $elements_validator
+   * @param \Drupal\webform\WebformEntityElementsValidatorInterface $elements_validator
    *   Webform element validator.
    */
-  public function __construct(RendererInterface $renderer, WebformEntityElementsValidator $elements_validator) {
+  public function __construct(RendererInterface $renderer, WebformEntityElementsValidatorInterface $elements_validator) {
     $this->renderer = $renderer;
     $this->elementsValidator = $elements_validator;
   }
@@ -110,7 +110,7 @@ class WebformUiElementDeleteForm extends ConfirmFormBase {
       $build['elements']['#title'] = t('The below nested elements will be also deleted.');
     }
 
-    return $this->renderer->render($build);
+    return $this->renderer->renderPlain($build);
   }
 
   /**
@@ -188,13 +188,13 @@ class WebformUiElementDeleteForm extends ConfirmFormBase {
       throw new NotFoundHttpException();
     }
 
-    /** @var \Drupal\webform\WebformElementManagerInterface $element_manager */
+    /** @var \Drupal\webform\Plugin\WebformElementManagerInterface $element_manager */
     $element_manager = \Drupal::service('plugin.manager.webform.element');
     $plugin_id = $element_manager->getElementPluginId($this->element);
     $this->webformElement = $element_manager->createInstance($plugin_id, $this->element);
 
     $form = parent::buildForm($form, $form_state);
-    $form = $this->buildConfirmFormDialog($form, $form_state);
+    $form = $this->buildDialogConfirmForm($form, $form_state);
     return $form;
   }
 

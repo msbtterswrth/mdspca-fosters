@@ -5,12 +5,13 @@ namespace Drupal\webform_ui\Form;
 use Drupal\Core\Entity\EntityFieldManagerInterface;
 use Drupal\Core\Form\FormBase;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Form\SubformState;
 use Drupal\Core\Render\RendererInterface;
 use Drupal\Core\Url;
 use Drupal\webform\Utility\WebformDialogHelper;
-use Drupal\webform\WebformDialogTrait;
-use Drupal\webform\WebformElementManagerInterface;
-use Drupal\webform\WebformEntityElementsValidator;
+use Drupal\webform\Form\WebformDialogFormTrait;
+use Drupal\webform\Plugin\WebformElementManagerInterface;
+use Drupal\webform\WebformEntityElementsValidatorInterface;
 use Drupal\webform\WebformInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
@@ -32,7 +33,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  */
 abstract class WebformUiElementFormBase extends FormBase implements WebformUiElementFormInterface {
 
-  use WebformDialogTrait;
+  use WebformDialogFormTrait;
 
   /**
    * The renderer.
@@ -51,7 +52,7 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
   /**
    * Webform element manager.
    *
-   * @var \Drupal\webform\WebformElementManagerInterface
+   * @var \Drupal\webform\Plugin\WebformElementManagerInterface
    */
   protected $elementManager;
 
@@ -88,7 +89,7 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
    *
    * @var string
    */
-  protected $parent_key;
+  protected $parentKey;
 
   /**
    * The webform element's original element type.
@@ -118,12 +119,12 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
    *   The renderer.
    * @param \Drupal\Core\Entity\EntityFieldManagerInterface $entity_field_manager
    *   The entity field manager.
-   * @param \Drupal\webform\WebformElementManagerInterface $element_manager
+   * @param \Drupal\webform\Plugin\WebformElementManagerInterface $element_manager
    *   The webform element manager.
-   * @param \Drupal\webform\WebformEntityElementsValidator $elements_validator
+   * @param \Drupal\webform\WebformEntityElementsValidatorInterface $elements_validator
    *   Webform element validator.
    */
-  public function __construct(RendererInterface $renderer, EntityFieldManagerInterface $entity_field_manager, WebformElementManagerInterface $element_manager, WebformEntityElementsValidator $elements_validator) {
+  public function __construct(RendererInterface $renderer, EntityFieldManagerInterface $entity_field_manager, WebformElementManagerInterface $element_manager, WebformEntityElementsValidatorInterface $elements_validator) {
     $this->renderer = $renderer;
     $this->entityFieldManager = $entity_field_manager;
     $this->elementManager = $element_manager;
@@ -145,14 +146,17 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
   /**
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state, WebformInterface $webform = NULL, $key = NULL, $parent_key = '') {
+  public function buildForm(array $form, FormStateInterface $form_state, WebformInterface $webform = NULL, $key = NULL, $parent_key = NULL, $type = NULL) {
     $this->webform = $webform;
     $this->key = $key;
-    $this->parent_key = $parent_key;
+    $this->parentKey = $parent_key;
 
     $webform_element = $this->getWebformElement();
 
-    $form['properties'] = $webform_element->buildConfigurationForm([], $form_state);
+    $form['#parents'] = [];
+    $form['properties'] = ['#parents' => ['properties']];
+    $subform_state = SubformState::createForSubform($form['properties'], $form, $form_state);
+    $form['properties'] = $webform_element->buildConfigurationForm($form['properties'], $subform_state);
 
     // Move messages to the top of the webform.
     if (isset($form['properties']['messages'])) {
@@ -207,7 +211,6 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
       $reserved_keys = ['form_build_id', 'form_token', 'form_id', 'data', 'op'];
       $reserved_keys = array_merge($reserved_keys, array_keys($this->entityFieldManager->getBaseFieldDefinitions('webform_submission')));
       $form['#attached']['drupalSettings']['webform_ui']['reserved_keys'] = $reserved_keys;
-      $form['#attached']['library'][] = 'webform_ui/webform_ui.element';
       $form['properties']['element']['key_warning'] = [
         '#type' => 'webform_message',
         '#message_type' => 'warning',
@@ -229,7 +232,10 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
       '#required' => TRUE,
       '#parents' => ['key'],
       '#disabled' => ($key) ? TRUE : FALSE,
-      '#default_value' => $key,
+      // Allow key to populated using query string parameter.
+      // Use by 'Edit submit button(s)'.
+      // @see \Drupal\webform_ui\WebformUiEntityEditForm::editForm
+      '#default_value' => $this->getRequest()->get('key') ?: $key ?: $webform_element->getDefaultKey(),
       '#weight' => -98,
     ];
     // Remove the key's help text (aka description) once it has been set.
@@ -247,6 +253,8 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
     if (isset($form['properties']['flex']) && !$this->isParentElementFlexbox($key, $parent_key)) {
       $form['properties']['flex']['#access'] = FALSE;
     }
+    
+    $form['#attached']['library'][] = 'webform_ui/webform_ui';
 
     // Set actions.
     $form['actions'] = ['#type' => 'actions'];
@@ -257,9 +265,7 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
       '#_validate_form' => TRUE,
     ];
 
-    $form = $this->buildFormDialog($form, $form_state);
-
-    return $form;
+    return $this->buildDialogForm($form, $form_state);
   }
 
   /**
@@ -272,31 +278,38 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
       return;
     }
 
-    // The webform element configuration is stored in the 'properties' key in
-    // the webform, pass that through for validation.
-    $element_form_state = clone $form_state;
-    $element_form_state->setValues($form_state->getValue('properties'));
+    $subform_state = SubformState::createForSubform($form['properties'], $form, $form_state);
 
     // Validate configuration webform.
     $webform_element = $this->getWebformElement();
-    $webform_element->validateConfigurationForm($form, $element_form_state);
+    $webform_element->validateConfigurationForm($form, $subform_state);
 
     // Get errors for element validation.
-    $element_errors = $element_form_state->getErrors();
+    $element_errors = $subform_state->getErrors();
     foreach ($element_errors as $element_error) {
       $form_state->setErrorByName(NULL, $element_error);
     }
 
-    // Stop validation is the element properties has any errors.
-    if ($form_state->hasAnyErrors()) {
+    // Stop validation if the element properties has any errors.
+    if ($subform_state->hasAnyErrors()) {
       return;
     }
 
-    // Set element properties.
-    $properties = $webform_element->getConfigurationFormProperties($form, $element_form_state);
     $parent_key = $form_state->getValue('parent_key');
     $key = $form_state->getValue('key');
+
+    // Make sure element key is unique for new elements.
+    if ($this instanceof WebformUiElementAddForm || $this instanceof WebformUiElementDuplicateForm) {
+      $element_flattened = $this->getWebform()->getElementsDecodedAndFlattened();
+      if (isset($element_flattened[$key])) {
+        $form_state->setErrorByName('key', $this->t('The element key is already in use. It must be unique.'));
+      }
+    }
+
+    // Set element properties.
+    $properties = $webform_element->getConfigurationFormProperties($form, $subform_state);
     if ($key) {
+      $this->key = $key;
       $this->webform->setElementProperties($key, $properties, $parent_key);
 
       // Validate elements.
@@ -316,20 +329,15 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
   public function submitForm(array &$form, FormStateInterface $form_state) {
     $webform_element = $this->getWebformElement();
 
-    if ($response = $this->validateDialog($form, $form_state)) {
-      return $response;
-    }
-
     // The webform element configuration is stored in the 'properties' key in
     // the webform, pass that through for submission.
-    $element_form_state = clone $form_state;
-    $element_form_state->setValues($form_state->getValue('properties'));
+    $subform_state = SubformState::createForSubform($form['properties'], $form, $form_state);
 
     // Submit element configuration.
     // Generally, elements will not be processing any submitted properties.
     // It is possible that a custom element might need to call a third-party API
     // to 'register' the element.
-    $webform_element->submitConfigurationForm($form, $element_form_state);
+    $webform_element->submitConfigurationForm($form, $subform_state);
 
     // Save the webform with its updated element.
     $this->webform->save();
@@ -342,8 +350,16 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
     ];
     drupal_set_message($this->t('%title has been @action.', $t_args));
 
-    // Redirect.
-    return $this->redirectForm($form, $form_state, $this->webform->toUrl('edit-form', ['query' => ['element-update' => $form_state->getValue('key')]]));
+    // Append ?update= to (redirect) destination.
+    if ($this->requestStack->getCurrentRequest()->query->get('destination')) {
+      $redirect_destination = $this->getRedirectDestination();
+      $destination = $redirect_destination->get();
+      $destination .= (strpos($destination, '?') !== FALSE ? '&' : '?') . 'update=' . $this->key;
+      $redirect_destination->set($destination);
+    }
+
+    // Still set the redirect URL just to be safe.
+    $form_state->setRedirectUrl($this->webform->toUrl('edit-form', ['query' => ['update' => $this->key]]));
   }
 
   /**
@@ -399,7 +415,7 @@ abstract class WebformUiElementFormBase extends FormBase implements WebformUiEle
    * {@inheritdoc}
    */
   public function getParentKey() {
-    return $this->parent_key;
+    return $this->parentKey;
   }
 
   /**

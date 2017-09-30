@@ -31,7 +31,12 @@ interface WebformTokenManagerInterface {
 
   /**
    * Build token tree link if token.module is installed.
+   *
+   * @param array $token_types
+   *   An array containing token types that should be shown in the tree.
+   * @param string $description
+   *   (optional) Description to appear after the token tree link.
    */
-  public function buildTreeLink();
+  public function buildTreeLink(array $token_types = ['webform', 'webform_submission'], $description = NULL);
 
 }

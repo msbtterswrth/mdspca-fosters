@@ -1,8 +1,4 @@
 <?php
-/**
- * @file
- * Contains \Drupal\menu_attributes\Tests\MenuAttributesTestBase.
- */
 
 namespace Drupal\menu_attributes\Tests;
 
@@ -120,7 +116,7 @@ abstract class MenuAttributesTestBase extends MenuWebTestBase {
 //    // Add menu link.
 //    $this->drupalPostForm(NULL, $edit, t('Save'));
 //
-//    $item = db_query('SELECT * FROM {menu_links} WHERE link_title = :title', array(':title' => $title))->fetchAssoc();
+//    $item = db_query('SELECT * FROM {menu_links} WHERE link_title = :title', [':title' => $title])->fetchAssoc());
 //
 //    return $item;
   }

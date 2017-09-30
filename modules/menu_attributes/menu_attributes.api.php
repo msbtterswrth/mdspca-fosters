@@ -26,16 +26,16 @@
  */
 function hook_menu_attribute_info() {
   // Add a Tabindex attribute.
-  $info['tabindex'] = array(
+  $info['tabindex'] = [
     'label' => t('Tabindex'),
     'description' => t('Specifies the tab order for the link.'),
     'item_description' => t('Specifies the tab order for the item.'),
-    'form' => array(
+    'form' => [
       '#maxlength' => 3,
       '#size' => 2,
-    ),
-    'scope' => array(MENU_ATTRIBUTES_LINK),
-  );
+    ],
+    'scope' => [MENU_ATTRIBUTES_LINK],
+  ];
 
   return $info;
 }

@@ -4,9 +4,7 @@ namespace Drupal\webform\Plugin\Field\FieldFormatter;
 
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
-use Drupal\Core\Field\Plugin\Field\FieldFormatter\EntityReferenceFormatterBase;
 use Drupal\Core\Form\FormStateInterface;
-use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Utility\Token;
 use Drupal\webform\WebformMessageManagerInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
@@ -23,10 +21,10 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  *   }
  * )
  */
-class WebformEntityReferenceLinkFormatter extends EntityReferenceFormatterBase implements ContainerFactoryPluginInterface {
+class WebformEntityReferenceLinkFormatter extends WebformEntityReferenceFormatterBase {
 
   /**
-   * The message manager.
+   * The webform message manager.
    *
    * @var \Drupal\webform\WebformMessageManagerInterface
    */
@@ -57,14 +55,13 @@ class WebformEntityReferenceLinkFormatter extends EntityReferenceFormatterBase i
    * @param array $third_party_settings
    *   Third party settings.
    * @param \Drupal\webform\WebformMessageManagerInterface $message_manager
-   *   The message manager.
+   *   The webform message manager.
    * @param \Drupal\Core\Utility\Token $token
    *   The token service.
    */
   public function __construct($plugin_id, $plugin_definition, FieldDefinitionInterface $field_definition, array $settings, $label, $view_mode, array $third_party_settings, WebformMessageManagerInterface $message_manager, Token $token) {
-    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings);
+    parent::__construct($plugin_id, $plugin_definition, $field_definition, $settings, $label, $view_mode, $third_party_settings, $message_manager);
 
-    $this->messageManager = $message_manager;
     $this->token = $token;
   }
 
@@ -98,7 +95,7 @@ class WebformEntityReferenceLinkFormatter extends EntityReferenceFormatterBase i
    * {@inheritdoc}
    */
   public function settingsSummary() {
-    $summary = [];
+    $summary = parent::settingsSummary();
     $summary[] = $this->t('Label: @label', ['@label' => $this->getSetting('label')]);
     return $summary;
   }
@@ -107,13 +104,14 @@ class WebformEntityReferenceLinkFormatter extends EntityReferenceFormatterBase i
    * {@inheritdoc}
    */
   public function settingsForm(array $form, FormStateInterface $form_state) {
-    $element['label'] = [
+    $form = parent::settingsForm($form, $form_state);
+    $form['label'] = [
       '#title' => $this->t('Label'),
       '#type' => 'textfield',
       '#default_value' => $this->getSetting('label'),
       '#required' => TRUE,
     ];
-    return $element;
+    return $form;
   }
 
   /**
@@ -125,9 +123,15 @@ class WebformEntityReferenceLinkFormatter extends EntityReferenceFormatterBase i
 
     $elements = [];
 
-    foreach ($this->getEntitiesToView($items, $langcode) as $delta => $entity) {
-      /** @var \Drupal\webform\WebformInterface $entity */
-      if ($entity->id() && $items[$delta]->status) {
+    /** @var \Drupal\webform\WebformInterface[] $entities */
+    $entities = $this->getEntitiesToView($items, $langcode);
+    foreach ($entities as $delta => $entity) {
+      // Do not display the webform if the current user can't create submissions.
+      if ($entity->id() && !$entity->access('submission_create')) {
+        continue;
+      }
+
+      if ($entity->isOpen()) {
         $link_options = [
           'query' => [
             'source_entity_type' => $source_entity->getEntityTypeId(),
@@ -136,17 +140,19 @@ class WebformEntityReferenceLinkFormatter extends EntityReferenceFormatterBase i
         ];
         $elements[$delta] = [
           '#type' => 'link',
-          '#title' => $this->token->replace($this->getSetting('label'), [
+          '#title' => $this->t($this->token->replace($this->getSetting('label'), [
             'webform' => $entity,
-          ]),
+          ])),
           '#url' => $entity->toUrl('canonical', $link_options),
         ];
       }
       else {
-        /** @var \Drupal\webform\WebformMessageManagerInterface $message_manager */
         $this->messageManager->setWebform($entity);
-        $elements[$delta] = $this->messageManager->build(WebformMessageManagerInterface::FORM_CLOSED_MESSAGE);
+        $message_type = $entity->isOpening() ? WebformMessageManagerInterface::FORM_OPEN_MESSAGE : WebformMessageManagerInterface::FORM_CLOSE_MESSAGE;
+        $elements[$delta] = $this->messageManager->build($message_type);
       }
+
+      $this->setCacheContext($elements[$delta], $entity, $items[$delta]);
     }
 
     return $elements;

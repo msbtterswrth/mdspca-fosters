@@ -2,9 +2,10 @@
 
 namespace Drupal\webform\Utility;
 
-use Drupal\Component\Render\FormattableMarkup;
+use Drupal\Component\Render\MarkupInterface;
 use Drupal\Component\Serialization\Json;
 use Drupal\Component\Utility\Xss;
+use Drupal\Core\Render\Markup;
 use Drupal\Core\Render\Element;
 use Drupal\Core\Template\Attribute;
 
@@ -39,11 +40,34 @@ class WebformElementHelper {
   ];
 
   /**
+   * Ignored element sub properties used by composite elements.
+   *
+   * @var array
+   */
+  public static $ignoredSubProperties = [
+    // Properties that will allow code injection.
+    '#allowed_tags' => '#allowed_tags',
+    // Properties that will break webform data handling.
+    '#tree' => '#tree',
+    '#array_parents' => '#array_parents',
+    '#parents' => '#parents',
+    // Callbacks are blocked to prevent unwanted code executions.
+    '#after_build' => '#after_build',
+    '#element_validate' => '#element_validate',
+    '#post_render' => '#post_render',
+    '#pre_render' => '#pre_render',
+    '#process' => '#process',
+    '#submit' => '#submit',
+    '#validate' => '#validate',
+    '#value_callback' => '#value_callback',
+  ];
+
+  /**
    * Regular expression used to determine if sub-element property should be ignored.
    *
    * @var string
    */
-  protected static $ignoredPropertiesRegExp;
+  protected static $ignoredSubPropertiesRegExp;
 
   /**
    * Determine if a webform element's title is displayed.
@@ -96,6 +120,27 @@ class WebformElementHelper {
   }
 
   /**
+   * Set a property on all elements.
+   *
+   * @param array $element
+   *   A render element.
+   * @param string $property_key
+   *   The property key.
+   * @param mixed $property_value
+   *   The property value.
+   *
+   * @return array
+   *   A render element with with a property set on all elements.
+   */
+  public static function setPropertyRecursive(array $element, $property_key, $property_value) {
+    $element[$property_key] = $property_value;
+    foreach (Element::children($element) as $key) {
+      self::setPropertyRecursive($element[$key], $property_key, $property_value);
+    }
+    return $element;
+  }
+
+  /**
    * Fix webform element #states handling.
    *
    * @param array $element
@@ -116,11 +161,16 @@ class WebformElementHelper {
     // $element['#prefix'] = '<div ' . new Attribute($attributes) . '>' . $element['#prefix'];
     // WORKAROUND: Safely set filtered #prefix to FormattableMarkup.
     $allowed_tags = isset($element['#allowed_tags']) ? $element['#allowed_tags'] : Xss::getHtmlTagList();
-    $element['#prefix'] = new FormattableMarkup('<div' . new Attribute($attributes) . '>' . Xss::filter($element['#prefix'], $allowed_tags), []);
+    $element['#prefix'] = Markup::create('<div' . new Attribute($attributes) . '>' . Xss::filter($element['#prefix'], $allowed_tags));
     $element['#suffix'] = $element['#suffix'] . '</div>';
 
     // Attach library.
     $element['#attached']['library'][] = 'core/drupal.states';
+
+    // Copy #states to #_webform_states property which can be used by the
+    // WebformSubmissionConditionsValidator.
+    // @see \Drupal\webform\WebformSubmissionConditionsValidator
+    $element['#_webform_states'] = $element['#states'];
 
     // Remove #states property to prevent nesting.
     unset($element['#states']);
@@ -183,15 +233,15 @@ class WebformElementHelper {
    * @see \Drupal\webform\Element\WebformCompositeBase::processWebformComposite
    */
   protected static function isIgnoredProperty($property) {
-    // Build cached ignored properties regular expression.
-    if (!isset(self::$ignoredPropertiesRegExp)) {
-      self::$ignoredPropertiesRegExp = '/__(' . implode('|', array_keys(WebformArrayHelper::removePrefix(self::$ignoredProperties))) . ')$/';
+    // Build cached ignored sub properties regular expression.
+    if (!isset(self::$ignoredSubPropertiesRegExp)) {
+      self::$ignoredSubPropertiesRegExp = '/__(' . implode('|', array_keys(WebformArrayHelper::removePrefix(self::$ignoredSubProperties))) . ')$/';
     }
 
     if (isset(self::$ignoredProperties[$property])) {
       return TRUE;
     }
-    elseif (strpos($property, '__') !== FALSE && preg_match(self::$ignoredPropertiesRegExp, $property)) {
+    elseif (strpos($property, '__') !== FALSE && preg_match(self::$ignoredSubPropertiesRegExp, $property)) {
       return TRUE;
     }
     else {
@@ -279,6 +329,46 @@ class WebformElementHelper {
       $flattened_elements += self::getFlattened($element);
     }
     return $flattened_elements;
+  }
+
+  /**
+   * Convert all render(able) markup into strings.
+   *
+   * This method is used to prevent objects from being serialized on form's
+   * that are using #ajax callbacks or rebuilds.
+   *
+   * @param array $elements
+   *   An associative array of elements.
+   */
+  public static function convertRenderMarkupToStrings(array &$elements) {
+    foreach ($elements as $key => &$value) {
+      if (is_array($value)) {
+        self::convertRenderMarkupToStrings($value);
+      }
+      elseif ($value instanceof MarkupInterface) {
+        $elements[$key] = (string) $value;
+      }
+    }
+  }
+
+  /**
+   * Convert element or property to a string.
+   *
+   * This method is used to prevent 'Array to string conversion' errors.
+   *
+   * @param array|string|MarkupInterface $element
+   *   An element, render array, string, or markup.
+   *
+   * @return string
+   *   The element or property to a string.
+   */
+  public static function convertToString($element) {
+    if (is_array($element)) {
+      return (string) \Drupal::service('renderer')->renderPlain($element);
+    }
+    else {
+      return (string) $element;
+    }
   }
 
 }
