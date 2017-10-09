@@ -1,6 +1,6 @@
 <?php
 
-namespace Drupal\muhc;
+namespace Drupal\mdspca;
 
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\Core\Template\Attribute;
@@ -12,12 +12,12 @@ use Drupal\paragraphs\Entity\Paragraph;
 class Theme {
 
   /**
-   * @var \Drupal\muhc\Theme
+   * @var \Drupal\mdspca\Theme
    */
   protected static $_instance;
 
   /**
-   * @return \Drupal\muhc\Theme
+   * @return \Drupal\mdspca\Theme
    */
   public static function getInstance() {
     if (!self::$_instance) {
