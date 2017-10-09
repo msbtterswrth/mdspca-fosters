@@ -1,0 +1,14 @@
+{% extends 'block.html.twig' %}
+{% block content %}
+    <div class="col-xs-12 block-feature">
+        <img src="{{ file_url(content.field_image[0]['#item'].entity.uri.value) }}">
+        <div class="blurb">
+            <div class="row">
+                <div class="col-xs-12">
+                    {{ content.body }}
+                    <a class="btn btn-yellow" type="button" href="{{ content.field_link[0]['#url'] }}">{{ content.field_link[0]['#title'] }}</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

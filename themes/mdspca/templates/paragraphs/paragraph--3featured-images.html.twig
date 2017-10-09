@@ -1,0 +1,9 @@
+{% extends 'paragraph.html.twig' %}
+{% block content %}
+    <div class="featured-img-tile">
+        <a href="{{ content.field_link[0]['#url'] }}">
+            {{ content.field_image }}
+            {{ content.field_title }}
+        </a>
+    </div>
+{% endblock %}

@@ -1,0 +1,15 @@
+{% extends 'paragraph.html.twig' %}
+{% block content %}
+    <div class="rail-cta">
+		{% if content.field_title|render %}
+            <h3>{{ content.field_title }}</h3>
+        {% endif %}
+   		{{ content.field_body }}
+    </div>
+    {% if content.field_additional_text|render %}
+    <div class="rail-addition">
+    	{{ content.field_additional_text }}
+    </div>
+    {% endif %}
+{% endblock %}
+

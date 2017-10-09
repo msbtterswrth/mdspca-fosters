@@ -1,0 +1,6 @@
+{% if node.field_patient_resource_file.entity %}
+  {% set url = file_url(node.field_patient_resource_file.entity.uri.value) %}
+{% else %}
+  {% set url = content.field_patient_resource_link[0]['#url'] %}
+{% endif %}
+<li><a href="{{ url }}">{{ label }}</a></li>

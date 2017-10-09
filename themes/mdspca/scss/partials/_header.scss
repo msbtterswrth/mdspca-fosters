@@ -1,0 +1,386 @@
+.header {
+    background:$gray;
+    padding:20px 0;
+    #block-sitebranding {
+        img {
+            @include breakpoint(lg) {
+                max-width:90%
+            }
+        }
+    }
+    #block-utilitytop {
+        text-align:right;
+        nav {
+            display:inline-block;
+            ul {
+                padding:0;
+                list-style-type:none;
+                text-align:right;
+                li {
+                    display:inline-block;
+                    + li {
+                        margin-left:15px;
+                    }
+                    a {
+                        color:#fff;
+                        font-family:$font-pn;
+                        font-weight: 500;
+                        font-size:16px;
+                        letter-spacing:.5px;
+                        border-bottom:2px solid transparent;
+                        @include transition(border-bottom .3s linear);
+                        &:hover {
+                            border-bottom:2px solid #fff;
+                            text-decoration:none;
+                        }
+                    }
+                }
+            }
+        }
+        .btn {
+            display:inline-block;
+            background:none;
+            border-left: 1px solid rgba(255, 255, 255, 0.1);
+            color: #fff;
+            font-size: 55px;
+            line-height: 16px;
+            margin:0 0 0 20px;
+            padding: 0 0 0 20px;
+            position: relative;
+            @include transition(color .3s linear);
+            &::before {
+                background: #000;
+                content: "";
+                height: 100%;
+                left: -2px;
+                position: absolute;
+                top: 0;
+                width: 1px;
+            }
+            &:hover {
+                color:$yellow;
+            }
+        }
+    }
+}
+.navigation {
+    background:$yellow;
+    padding:16px 0;
+    overflow:hidden;
+    @include transition(padding .3s linear, max-height .3s linear);
+    @include breakpoint(sm) {
+        padding:2px 0;
+        max-height:0;
+        .nav-open &{
+            padding:16px 0 0 0;
+            max-height:2000px;
+        }
+        .container {
+            width:100%;
+        }
+    }
+	@include breakpoint(xs) {
+        padding:2px 0;
+        max-height:0;
+        .nav-open &{
+            padding:16px 0 0 0;
+            max-height:2000px;
+        }
+    }
+    .container {
+        overflow:hidden;
+    }
+    #block-mainnavigation {
+        padding-left:15px;
+        @include breakpoint(sm) {
+            padding-bottom:15px;
+        }
+		@include breakpoint(xs) {
+            padding-bottom:15px;
+        }
+        nav {
+            > nav {
+                display:inline-block;
+                width:91%;
+                margin:0;
+                @include transition(margin .3s cubic-bezier(0.0, 0.0, 0.2, 1));
+                @include breakpoint(md) {
+                    width:89%;
+                }
+                @include breakpoint(sm) {
+                    width:100%;
+                    display:block;
+                }
+                @include breakpoint(xs) {
+                    width:100%;
+                    display:block;
+                }
+                .more-open &{
+                    margin-left:-100%;
+                }
+                ul {
+                    padding:0;
+                    list-style-type:none;
+                    text-align:left;
+                    margin:0;
+                    li {
+                        display:inline-block;
+                        text-transform:uppercase;
+                        font-weight:600;
+                        @include breakpoint(sm) {
+                            width:100%;
+                            display:block;
+                        }
+						@include breakpoint(xs) {
+                            width:100%;
+                            display:block;
+                        }
+                        + li {
+                            margin-left:15px;
+                            @include breakpoint(sm) {
+                                margin-left:0;
+                                border-top:2px solid rgba(255,255,255,.2);
+                                margin-top:5px;
+                                padding-top:5px;
+                            }
+							@include breakpoint(xs) {
+                                margin-left:0;
+                                border-top:2px solid rgba(255,255,255,.2);
+                                margin-top:5px;
+                                padding-top:5px;
+                            }
+                        }
+                        a {
+                            color:$gray;
+                            font-family:$font-pn;
+                            font-size: 18px;
+                            font-weight: 500;
+                            letter-spacing: 1px;
+                            line-height: 35px;
+                            border-bottom:2px solid transparent;
+                            @include transition(border-bottom .3s linear);
+                            @include breakpoint(md) {
+                                font-family:$font-pnc;  
+                            }
+                            @include breakpoint(sm) {
+                                border:none; 
+                            }
+                            @include breakpoint(xs) {   
+                                border:none;
+                            }
+                            &:hover {
+                                border-bottom:2px solid $gray;
+                                text-decoration:none;
+                                @include breakpoint(sm) {
+                                    border:none;
+                                }
+								@include breakpoint(xs) {
+                                    border:none;
+                                }
+                            }
+                        }
+                        &.why-choose {
+                            float:right;
+                            text-transform:none;
+                            @include breakpoint(sm) {
+                                float:none;
+                                text-transform:uppercase;
+                            }
+							@include breakpoint(xs) {
+                                float:none;
+                                text-transform:uppercase;
+                            }
+                            a {
+                                font-size:18px;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .btn {
+            display:inline-block;
+            margin-left:15px;
+            float:right;
+            text-transform:uppercase;
+            background:none;
+            color:#fff;
+            font-weight:500;
+            padding:0;
+            margin:0 0 0 15px;
+            font-family:$font-pn;
+            font-size: 19px;
+            line-height: 32px;
+            letter-spacing: 1px;
+            .icon-menu {
+                font-size: 27px;
+                line-height: 21px;
+                vertical-align: text-top;
+            }
+            @include breakpoint(sm) {
+                display:none;
+            }
+			@include breakpoint(xs) {
+                display:none;
+            }
+        }
+    }
+    #block-mainmore {
+        background:$yellow;
+        position:absolute;
+        top:0;
+        left:100%;
+        @include transition(left .3s cubic-bezier(0.0, 0.0, 0.2, 1));
+        @include breakpoint(sm) {
+            width:100%;
+            display:block;
+            position:relative;
+            background:#fff;
+            left:0;
+            padding:15px;
+        }
+		@include breakpoint(xs) {
+            width:100%;
+            display:block;
+            position:relative;
+            background:#fff;
+            left:0;
+            padding:15px;
+        }
+        nav {
+            display:inline-block;
+            width:91%;
+            @include breakpoint(sm) {
+                width:100%;
+                display:block;
+            }
+			@include breakpoint(xs) {
+                width:100%;
+                display:block;
+            }
+            ul {
+                padding:0;
+                list-style-type:none;
+                text-align:left;
+                margin:0;
+                li {
+                    display:inline-block;
+                    text-transform:uppercase;
+                    font-weight:600;
+                    @include breakpoint(sm) {
+                        width:100%;
+                        display:block;
+                        text-transform:none;
+                    }
+					@include breakpoint(xs) {
+                        width:100%;
+                        display:block;
+                        text-transform:none;
+                    }
+                    + li {
+                        margin-left:15px;
+                        @include breakpoint(sm) {
+                            margin-left:0;
+                            border-top:2px solid rgba($gray,.2);
+                            margin-top:5px;
+                            padding-top:5px;
+                        }
+						@include breakpoint(xs) {
+                            margin-left:0;
+                            border-top:2px solid rgba($gray,.2);
+                            margin-top:5px;
+                            padding-top:5px;
+                        }
+                    }
+                    a {
+                        color:$gray;
+                        font-family:$font-pn;
+                        font-size: 18px;
+                        font-weight: 500;
+                        letter-spacing: 1px;
+                        line-height: 35px;
+                        @include breakpoint(md) {
+                          font-family:$font-pnc;  
+                        }
+                        @include breakpoint(sm) {
+                          	border:none; 
+                        }
+                        @include breakpoint(xs) {   
+                            border:none;
+                        }
+                    }
+                }
+            }
+        }
+        
+        .btn {
+            display:inline-block;
+            margin-right:15px;
+            font-family:$font-pn;
+            font-size: 18px;
+            letter-spacing: 1px;
+            line-height: 32px;
+            float:left;
+            text-transform:uppercase;
+            background:none;
+            color:#fff;
+            font-weight:500;
+            padding:0;
+            margin:0 15px 0 0;
+            @include breakpoint(sm) {
+                display:none;
+            }
+			@include breakpoint(xs) {
+                display:none;
+            }
+        }
+        .more-open &{
+            left:0;
+        }
+    }
+    #block-utilitytop-2 {
+        background:$gray;
+        padding:15px;
+        nav {
+            ul {
+                padding:0;
+                list-style-type:none;
+                text-align:left;
+                margin:0;
+                li {
+                    font-wight:600;
+                    width:100%;
+                    display:block;
+                    text-transform:none;
+                    + li {
+                        margin-left:15px;
+                        @include breakpoint(sm) {
+                            margin-left:0;
+                            border-top:2px solid rgba(255,255,255,.2);
+                            margin-top:5px;
+                            padding-top:5px;
+                        }
+						@include breakpoint(xs) {
+                            margin-left:0;
+                            border-top:2px solid rgba(255,255,255,.2);
+                            margin-top:5px;
+                            padding-top:5px;
+                        }
+                    }
+                    a {
+                        color:#fff;
+                        font-family:$font-pn;
+                        font-size: 18px;
+                        font-weight: 500;
+                        letter-spacing: 1px;
+                        line-height: 35px;
+                        border:none;
+                    }
+                }
+            }
+        }
+        .btn {
+            display:none;
+        }
+    }
+}

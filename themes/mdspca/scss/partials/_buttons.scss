@@ -1,0 +1,36 @@
+.btn {
+    border-radius:0!important;
+    box-shadow:none!important;
+    outline:none!important;
+    font-family:$font-pnc;
+    text-transform:uppercase;
+    text-decoration:none!important;
+    font-weight:700;
+    font-size:16px;
+    line-height:1;
+    padding:16px 30px 14px;
+    @include transition(background .3s linear);
+    &.btn-clear {
+        color:#fff!important;
+        border:1px solid #fff; 
+        background:rgba(255,255,255,.1);
+        &:hover {
+            background: rgba(255,255,255,.2);
+            color:#fff;
+        }
+    }
+    &.btn-yellow {
+        background:$yellow;
+        color:$gray!important;
+        &:hover {
+            background: darken($yellow, 20%);
+        }
+    }
+    &.btn-black {
+        background:#000;
+        color:#fff!important;
+        &:hover {
+            background: $md-gray;
+        }
+    }
+}

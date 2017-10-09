@@ -1,0 +1,23 @@
+<div {{ attributes|without('role', 'aria-labelledby') }}>
+    <div class="serviceline-toggle">
+        <span class="">Close Menu</span>
+        <span class="hidden">Open Menu</span>
+    </div>
+    <nav role="navigation" aria-labelledby="{{ heading_id }}">
+      {# Label. If not displayed, we still provide it for screen readers. #}
+      {% if not configuration.label_display %}
+        {% set title_attributes = title_attributes.addClass('visually-hidden') %}
+      {% endif %}
+      {{ title_prefix }}
+      <h4{{ title_attributes.setAttribute('id', heading_id) }}>{{ configuration.label }}</h4>
+      {{ title_suffix }}
+    
+      {# Menu. #}
+      {% block content %}
+        {{ content }}
+      {% endblock %}
+        <ul>
+            <li><a href="{{ path('entity.node.meet-the-team', {node: elements['#model'].entity.id}) }}">Meet Our Team</a></li>
+        </ul>
+    </nav>
+</div>

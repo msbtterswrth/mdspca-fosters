@@ -1,0 +1,39 @@
+<a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
+{% if page.drawer %}
+    <section class="drawer" role="complimentary" aria-label="Emergency Information">
+        <div class="container">
+            <div class="row">
+                {{ page.drawer }}
+            </div>
+        </div>
+    </section>
+{% endif %}
+{% if page.header %}
+    <section class="header" role="navigaton" aria-label="Secondary">
+        <div class="container">
+            <div class="row">
+                {{ page.header }}
+                <div class="global-search" role="search" aria-label="Global Search">
+                    <button class="btn search-toggle"><i class="icon-close"></i></button>
+                    <form method="get" action="{{ path('muhc_search.search') }}">
+                        <div class="input-group">
+                            <input type="text" name="keywords" class="form-control" placeholder="Search">
+                            <span class="input-group-btn">
+                                <button class="btn btn-search" type="submit"><i class="icon-search" ></i></button>
+                            </span>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endif %} 
+{% if page.navigation %}
+    <section class="navigation" role="navigaton" aria-label="Primary">
+        <div class="container">
+            <div class="row">
+                {{ page.navigation }}
+            </div>
+        </div>
+    </section>
+{% endif %} 
