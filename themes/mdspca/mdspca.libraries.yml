@@ -1,4 +1,5 @@
 global:
+  version: VERSION
   css:
     theme:
       public/style.css: {}
@@ -12,7 +13,6 @@ global:
     - mdspca/bootstrap-select
     - mdspca/awesome-bootstrap-checkbox
     - mdspca/matchheight
-    - mdspca/enquire
     - mdspca/slick
 bootstrap:
   css:
@@ -23,9 +23,6 @@ bootstrap:
     '//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js': { type: external, minified: true }
   dependencies:
     - core/jquery
-enquire:
-  js:
-    '//cdnjs.cloudflare.com/ajax/libs/enquire.js/2.1.2/enquire.min.js': { type: external, minified: true }
 bootstrap-select:
   css:
     theme:

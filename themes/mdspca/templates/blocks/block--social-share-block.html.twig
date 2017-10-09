@@ -1,9 +1,0 @@
-{% extends 'block.html.twig' %}
-{% set IHateSocialMediaSoMuch = "window.open(this.href, '', 'width=555,height=328');return false;" %}
-{% block content %}
-<div class="social clearfix">
-    <a class="facebook" href="{{ content.facebook }}" onclick="{{ IHateSocialMediaSoMuch }}"><i class="icon-facebook"></i></a>
-    <a class="twitter" href="{{ content.twitter }}" onclick="{{ IHateSocialMediaSoMuch }}"><i class="icon-twitter"></i></a>
-    <a class="email" href="{{ content.email }}"><i class="icon-send"></i></a>
-</div>
-{% endblock %}
