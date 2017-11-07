@@ -11,13 +11,13 @@
         font-family:$font-pn;
         font-weight:400;
         width:100%;
-        color:$lt-gray;
-        background:$xl-blue;
+        color:$md-gray;
+        background:#fff;
         &:focus {
-            border:1px solid $yellow; 
+            border:1px solid $teal; 
         }
         &.error {
-            border:1px solid $red;
+            border:1px solid $pink;
         }
         @include placeholder {
             color:$lt-gray;
@@ -30,7 +30,7 @@
         outline:none;
         padding:16px;
         &:focus {
-            border:1px solid $yellow; 
+            border:1px solid $teal; 
             box-shadow:none;
         }
         &::-webkit-input-placeholder { /* Chrome/Opera/Safari */
@@ -116,14 +116,14 @@
         border:none;
         box-shadow:none;
         border-radius:0;
-        background:$xl-blue;
+        background:$xl-gray;
         > li {
             > a {
                 text-transform:none;
                 font-size:18px!important;
                 &:hover, &:focus {
                     color:#fff;
-                    background:$blue;
+                    background:$lt-gray;
                 }
             }
         }                                

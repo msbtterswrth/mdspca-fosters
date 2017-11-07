@@ -1,7 +1,7 @@
 .slick {
     .slick-arrow {
         position:absolute;
-        background:$yellow;
+        background:none;
         height:100px;
         width:40px;
         z-index:9;
@@ -39,7 +39,6 @@
             }
         }
         &:hover {
-            background:darken($yellow, 20%);
             &::before {
                 opacity:1;
             }
@@ -82,188 +81,6 @@
                 padding:12px 30px;
                 text-transform:uppercase;
                 font-family:$font-pn;
-            }
-        }
-    }
-}
-#block-featuredarticlesblock {
-    .slick {
-        .slick-list {
-            .slide {
-                width:50vw;
-                @include breakpoint(sm) {
-                    width:100vw;
-                }
-                @include breakpoint(xs) {
-                    width:100vw;
-                }
-                .featured-item {
-                    position:relative;
-                    &::before {
-                        @include imgGradient;
-                    }
-                    &.sm {
-                        float: left;
-                        width: 50%;
-                        .blurb {
-                            h3 {
-                                text-transform:none;
-                            }
-                        }
-                    }
-                    .blurb {
-                        position:absolute;
-                        width:100%;
-                        left:0;
-                        bottom:0;
-                        padding:20px;
-                        h2 {
-                            color:#fff; 
-                            text-decoration:none;
-                            font-family:$font-pnc;
-                            font-size: 32px;
-                            font-weight: 400;
-                            margin:0;
-                            + p {
-                                margin:10px 0 0 0;
-                                color:#fff; 
-                                text-decoration:none;
-                                font-family:$font-pn;
-                                font-size: 24px;
-                                font-weight: 400;
-                            }
-                        }
-                        h3 {
-                            margin:0;
-                            color:#fff; 
-                            text-decoration:none;
-                            font-family:$font-pnc;
-                            font-size: 24px;
-                            font-weight: 400;
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-.featured-articles {
-	overflow:hidden;
-    @include breakpoint(xs) {
-        padding:0 15px;
-    }
-	.links {
-		background:rgba(#000,.9);
-		padding:50px;
-		position:absolute;
-		top:50%;
-		z-index:9;
-		max-height:100%;
-		display:block;
-		@include translate(0,-50%);
-		@include breakpoint(xs) {
-			position:relative;
-			top:0;
-			width:100%;
-            background:none;
-            padding:30px 0;
-			@include translate(0,0);
-		}
-		h2 {
-			color:#fff;
-			margin:0 0 20px 0;
-			font-family:$font-pnc;
-			font-size:28px;
-			font-weight:500;
-            @include breakpoint(xs) {
-                color:$gray;
-            }
-		}
-		a {
-			color:#fff;
-			display:block;
-			font-family:$font-pn;
-			font-size:18px;
-            @include breakpoint(xs) {
-                color:$blue;
-            }
-			+ a {
-				margin-top:15px;
-				@include breakpoint(lg) {
-					margin-top:25px;
-				}				
-			}
-		}
-		.btn {
-			display:inline-block;
-		}
-	}
-    .slick-arrow {
-        @include breakpoint(xs) {
-            height:100px;
-        }
-        &.slick-next {
-            @include breakpoint(xs) {
-                right:-15px;
-            }
-        }
-        &.slick-prev {
-            @include breakpoint(xs) {
-                left:-15px;
-            }
-        }
-    }
-    .slick {
-        .slick-list {
-            .slide {
-                width:33vw!important;
-                @include breakpoint(xl) {
-                    width:25vw!important;
-                }
-				@include breakpoint(sm) {
-                    width:50vw!important;
-                }
-				@include breakpoint(xs) {
-                    width:100vw!important;
-                }
-                .featured-item {
-                    position:relative;
-                    &::before {
-                        @include imgGradient;
-                    }
-                    .blurb {
-                        position:absolute;
-                        width:100%;
-                        left:0;
-                        bottom:0;
-                        padding:30px;
-                        h2 {
-                            color:#fff; 
-                            text-decoration:none;
-                            font-family:$font-pnc;
-                            font-size: 32px;
-                            font-weight: 400;
-                            margin:0;
-                            + p {
-                                margin:10px 0 0 0;
-                                color:#fff; 
-                                text-decoration:none;
-                                font-family:$font-pn;
-                                font-size: 24px;
-                                font-weight: 400;
-                            }
-                        }
-                        h3 {
-                            margin:0;
-                            color:#fff; 
-                            text-decoration:none;
-                            font-family:$font-pnc;
-                            font-size: 24px;
-                            font-weight: 400;
-							text-transform: none;
-                        }
-                    }
-                }
             }
         }
     }

@@ -19,11 +19,25 @@
             color:#fff;
         }
     }
-    &.btn-yellow {
-        background:$yellow;
-        color:$gray!important;
+    &.btn-pink {
+        background:$pink;
+        color:#fff!important;
         &:hover {
-            background: darken($yellow, 20%);
+            background: darken($pink, 20%);
+        }
+    }
+    &.btn-teal {
+        background:$teal;
+        color:#fff!important;
+        &:hover {
+            background: darken($teal, 20%);
+        }
+    }
+    &.btn-green {
+        background:$green;
+        color:#fff!important;
+        &:hover {
+            background: darken($green, 20%);
         }
     }
     &.btn-black {

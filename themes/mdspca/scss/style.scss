@@ -49,13 +49,7 @@ body {
             position:relative;
         }
         &.bottom {
-            background:$xl-yellow;
-            h3 {
-                font-weight:400;
-            }
-            a {
-                color:$blue;
-            }
+            background:darken($teal,20%);
         }
 		&.feature {
 			padding:0;
@@ -111,7 +105,7 @@ body {
     }
     blockquote {
         margin:30px 0;
-        border-left:5px solid $yellow;
+        border-left:5px solid $green;
         p {
             font-family:Georgia, serif;
             color:$gray;
@@ -147,9 +141,9 @@ body {
         tr {
             th {
                 border:none;
-                background:$yellow; 
+                background:$teal; 
                 font-family:$font-pnc;
-                color:$gray;
+                color:#fff;
                 padding:15px 30px;
                 font-weight:700;
                 text-transform:uppercase;   
@@ -161,8 +155,8 @@ body {
             }
             &:nth-of-type(2n) {
                 td {
-                    background:#FBF9F4;
-                    border-top:1px solid $xl-gray;
+                    background:$xl-gray;
+                    border-top:1px solid $lt-gray;
                 }
             }
         }
@@ -184,7 +178,7 @@ body {
             color:$lt-gray;
             letter-spacing:1px;
             &:hover {
-                color:$blue;
+                color:$teal;
             }
         }
         span {
@@ -192,6 +186,7 @@ body {
             text-transform:uppercase;
         }
     }
+    
     .pager {
         text-align:left;
         ul {
@@ -208,8 +203,8 @@ body {
                 }
                 &.is-active, &:hover {
                     a {
-                        background:$yellow;
-                        border:2px solid $yellow;
+                        background:$pink;
+                        border-bottom:2px solid $pink;
                     }
                 }
             }
@@ -290,56 +285,11 @@ body {
             padding:20px;
             color:#fff;
             h4 {
-                color:$yellow;
+                color:$pink;
                 font-family:$font-pnc;
             }
             a {
                 color:#fff;
-            }
-        }
-        &.box4 {
-            background:$md-gray;
-            padding:20px;
-            color:#fff;
-            h4 {
-                color:$yellow;
-                font-family:$font-pnc;
-            }
-            a {
-                color:#fff;
-            }
-        }
-        &.box5 {
-            h4 {
-                background:$yellow;
-                font-family:$font-pnc;
-                color:$gray;
-                padding:15px 30px;
-                margin:0;
-                font-weight:700;
-                text-transform:uppercase;
-            }
-            p {
-                margin:0;
-                padding:15px 30px;
-            }
-            ul {
-                list-style-type:none;
-                li {
-                    padding:15px 30px 10px 30px;
-                    background:#fff;
-                    &:nth-of-type(2n) {
-                        background:#FBF9F4;
-                        border-top:1px solid $xl-gray;
-                    }
-                }
-            }
-        }
-        &.box6 {
-            background:$xl-blue;
-            padding:20px;
-            .btn {
-                display:block;
             }
         }
     }
