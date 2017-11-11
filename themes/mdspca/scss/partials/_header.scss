@@ -1,0 +1,28 @@
+.header {
+    background:#fff;
+    p {
+        color:$pink;
+        font-size:22px;
+        text-transform:uppercase;
+        text-align:right;
+        margin-top:20px;
+    }
+    ul {
+        list-style-type:none;
+        padding:0;
+        margin:0;
+        text-align:right;
+        li {
+            display:inline-block;
+            + li {
+                margin-left:15px;
+            }
+            a {
+                color:$gray;
+                &:hover, &.active {
+                    color:$green;
+                }
+            }
+        }
+    }
+}

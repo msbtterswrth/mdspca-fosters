@@ -11,6 +11,15 @@
 #}
 <div{{ wrap }}>
 <a id="main-content" tabindex="-1"></a>{# link is in html.html.twig #}
+{% if page.header %}
+    <section class="header" role="header" aria-label="Header">
+        <div class="container">
+            <div class="row">
+                {{ page.header }}
+            </div>
+        </div>
+    </section>
+{% endif %} 
 {% if page.banner %}
     <section class="banner" role="banner" aria-label="Banner">
         <div class="container-fluid">
@@ -42,7 +51,7 @@
         </section>
     {% endif %}
     {% if page.content %}
-        <section class="content">
+        <section class="content" aria-label="Content">
             <div class="container">
                 <div class="row">
                      {% if page.sidebar %}
@@ -87,10 +96,19 @@
     </section>
 {% endif %} 
 {% if page.feature %}
-    <section class="feature" role="navigaton" aria-label="Featured Bottom Content">
+    <section class="feature" role="complimentary" aria-label="Featured Bottom Content">
         <div class="container-fluid">
             <div class="row">
                 {{ page.feature }}
+            </div>
+        </div>
+    </section>
+{% endif %} 
+{% if page.footer %}
+    <section class="footer" role="complimentary" aria-label="Footer Content">
+        <div class="container">
+            <div class="row">
+                {{ page.footer }}
             </div>
         </div>
     </section>

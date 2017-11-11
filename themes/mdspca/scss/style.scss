@@ -15,7 +15,7 @@
 body {
     text-rendering: optimizeLegibility;
     font-size:16px;
-    font-family:$font-pn;
+    font-family:$font-ag;
     section {
         padding:40px 0;
         position:relative;
@@ -50,6 +50,22 @@ body {
         }
         &.bottom {
             background:darken($teal,20%);
+            padding:15px 0;
+            h3 {
+                color:$green;
+                font-weight: 400;
+                text-transform: uppercase;
+                display: inline-block;
+                margin: 0;
+            }
+            p {
+                display: inline-block;
+                color: #fff;
+                font-size: 16px;
+                vertical-align: 5px;
+                margin-left: 30px;
+                margin-bottom:0;
+            }
         }
 		&.feature {
 			padding:0;
@@ -102,6 +118,9 @@ body {
             line-height:40px;
             margin:0 0 30px 0;
         }
+    }
+    a {
+        @include transition(color .3s linear);
     }
     blockquote {
         margin:30px 0;

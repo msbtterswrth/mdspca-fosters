@@ -1,11 +1,23 @@
 @font-face {
+    font-family: 'avantgarde';
+    src: url('/themes/mdspca/fonts/avant_garde_book_bt.eot');
+    src: url('/themes/mdspca/fonts/avant_garde_book_bt.eot?#iefix') format('embedded-opentype'),
+         url('/themes/mdspca/fonts/avant_garde_book_bt.woff2') format('woff2'),
+         url('/themes/mdspca/fonts/avant_garde_book_bt.woff') format('woff'),
+         url('/themes/mdspca/fonts/avant_garde_book_bt.ttf') format('truetype'),
+         url('/themes/mdspca/fonts/avant_garde_book_bt.svg#avantgarde_bk_btbook') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+@font-face {
   font-family: 'icomoon';
-  src:  url('/themes/muhc/fonts/icomoon.eot?jffoe1');
-  src:  url('/themes/muhc/fonts/icomoon.eot?jffoe1#iefix') format('embedded-opentype'),
-    url('/themes/muhc/fonts/icomoon.woff2?jffoe1') format('woff2'),
-    url('/themes/muhc/fonts/icomoon.ttf?jffoe1') format('truetype'),
-    url('/themes/muhc/fonts/icomoon.woff?jffoe1') format('woff'),
-    url('/themes/muhc/fonts/icomoon.svg?jffoe1#icomoon') format('svg');
+  src:  url('/themes/mdspca/fonts/icomoon.eot?jffoe1');
+  src:  url('/themes/mdspca/fonts/icomoon.eot?jffoe1#iefix') format('embedded-opentype'),
+    url('/themes/mdspca/fonts/icomoon.woff2?jffoe1') format('woff2'),
+    url('/themes/mdspca/fonts/icomoon.ttf?jffoe1') format('truetype'),
+    url('/themes/mdspca/fonts/icomoon.woff?jffoe1') format('woff'),
+    url('/themes/mdspca/fonts/icomoon.svg?jffoe1#icomoon') format('svg');
   font-weight: normal;
   font-style: normal;
 }
